@@ -1,0 +1,27 @@
+/**
+ * Global style overrides for STUNMESH-go docs.
+ * Primary palette derived from a WireGuard-adjacent teal.
+ */
+
+:root {
+  --ifm-color-primary: #0d7a6f;
+  --ifm-color-primary-dark: #0c6e64;
+  --ifm-color-primary-darker: #0b675e;
+  --ifm-color-primary-darkest: #09554e;
+  --ifm-color-primary-light: #0e867a;
+  --ifm-color-primary-lighter: #0f8d80;
+  --ifm-color-primary-lightest: #129f91;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #2ec9b8;
+  --ifm-color-primary-dark: #29b5a6;
+  --ifm-color-primary-darker: #27ab9c;
+  --ifm-color-primary-darkest: #208d81;
+  --ifm-color-primary-light: #43cfc0;
+  --ifm-color-primary-lighter: #4ed2c4;
+  --ifm-color-primary-lightest: #6fdacf;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
