@@ -91,6 +91,23 @@ plugins:
 | `ping_monitor` | Global defaults for [ping monitoring](ping-monitoring.md). |
 | `plugins` | Named storage plugin instances — see [Storage Plugins](../plugins/overview.md). |
 
+## Per-interface fields
+
+Each entry under `interfaces:` is keyed by the WireGuard interface name (`wg0`, `utun7`, …).
+
+| Field | Required | Description |
+|---|---|---|
+| `peers` | yes | The peers to manage on this interface. |
+| `protocol` | no | Which families to run STUN discovery for — `ipv4` (default), `ipv6`, or `dualstack`. See [Interface Protocol](protocols.md#interface-protocol). |
+| `listen_interfaces` | no | FreeBSD/macOS only. Underlay interfaces to capture STUN responses on. Empty (default) means all eligible interfaces. See [Restricting listen interfaces](../reference/platform-internals.md#restricting-listen-interfaces). |
+| `listen_default_route` | no | FreeBSD/macOS only. Also capture on the default-route interface, resolved per-protocol. Defaults to `false`. Additive with `listen_interfaces`. |
+
+:::note
+
+`listen_interfaces` and `listen_default_route` have no effect on Linux, whose raw socket listens system-wide. Setting either key there logs a one-time warning and is otherwise ignored.
+
+:::
+
 ## Per-peer fields
 
 | Field | Required | Description |
