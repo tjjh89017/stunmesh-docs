@@ -28,11 +28,14 @@ It expects an already-configured WireGuard interface (e.g. brought up with `wg-q
 
 ## Configuration file
 
-Configuration is loaded from the first of these paths that exists:
+Configuration is loaded from the first of these paths that exists (each directory is checked for `config.yaml`, then `config.yml`):
 
+- `$STUNMESH_CONFIG_DIR/config.yaml`
 - `/etc/stunmesh/config.yaml`
 - `~/.stunmesh/config.yaml`
 - `./config.yaml`
+
+You can also point stunmesh-go at a specific file with `-c <file>` (aliases: `--config`), or at a directory with `--config-dir <dir>`. An explicitly given file or directory must exist — there is no fallback to the default search paths.
 
 A minimal two-node setup using the built-in Cloudflare plugin:
 
@@ -48,13 +51,13 @@ interfaces:
         public_key: "<PEER_B_PUBLIC_KEY_BASE64>"
         plugin: cf
 stun:
-  address: "stun.l.google.com:19302"
+  addresses: ["stun.l.google.com:19302"]
 plugins:
   cf:
     type: builtin
     name: cloudflare
     zone: example.com
-    token: ${CLOUDFLARE_API_TOKEN}
+    token: "<CLOUDFLARE_API_TOKEN>"
     subdomain: wg
 ```
 

@@ -25,7 +25,7 @@ plugins:
 | Field | Required | Description |
 |---|---|---|
 | `zone` | yes | The Cloudflare zone (your domain). |
-| `token` | yes | API token with DNS edit permission for the zone. Supports `${ENV_VAR}` expansion. |
+| `token` | yes | API token with DNS edit permission for the zone. The value is used literally — env vars are not expanded. |
 | `subdomain` | no | Subdomain under which records are created. |
 
 ## OpenDHT
