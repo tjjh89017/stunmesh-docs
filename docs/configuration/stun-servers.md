@@ -10,10 +10,16 @@ stunmesh-go supports configuring one or more STUN servers. When multiple servers
 
 ## Fields
 
-- **`stun.address`** (string): a single STUN server address. Kept for backward compatibility — existing configurations that only set this field continue to work without any changes.
+- **`stun.address`** (string, deprecated): a single STUN server address. Kept for backward compatibility — existing configurations that only set this field continue to work without any changes, and it takes highest priority (merged in front of `addresses`).
 - **`stun.addresses`** (list of strings): a list of STUN servers to try in order. Servers are attempted sequentially; the first successful response is used.
 
 Both fields can be used together. Duplicate entries across `address` and `addresses` are removed automatically, so listing the same server in both fields is safe.
+
+## Defaults and validation
+
+- **Neither field set**: stunmesh-go falls back to `stun.l.google.com:19302` and logs a startup warning.
+- **`addresses` explicitly empty** (`[]`, or containing only empty strings) **with no `address`**: startup fails with an error instead of silently using the default. This catches broken configs, e.g. a template variable that was never filled in.
+- **Any usable value set**: used as-is — no default is injected alongside your servers.
 
 ## Example
 

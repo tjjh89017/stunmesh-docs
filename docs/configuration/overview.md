@@ -6,13 +6,16 @@ sidebar_position: 1
 
 # Configuration Overview
 
-Configuration is loaded from the first of these paths that exists:
+Configuration is loaded from the first of these paths that exists (each directory is checked for `config.yaml`, then `config.yml`):
 
+- `$STUNMESH_CONFIG_DIR/config.yaml`
 - `/etc/stunmesh/config.yaml`
 - `~/.stunmesh/config.yaml`
 - `./config.yaml`
 
-Environment variables with the `STUNMESH_` prefix can override config values.
+Two CLI flags override the search: `-c <file>` (alias `--config`) reads exactly that file, and `--config-dir <dir>` looks for `config.yaml`/`config.yml` in that directory. An explicit file or directory must exist — startup fails hard instead of falling back to the defaults. If no config file is found via the default search, stunmesh-go starts with built-in defaults.
+
+The config file must be YAML. Environment variables cannot override config values, and values are **not** expanded — a token written as `${MY_TOKEN}` is sent to the storage backend literally. Write secrets directly into the file (environment variables are only expanded inside the search paths themselves, e.g. `$STUNMESH_CONFIG_DIR`).
 
 :::note
 
@@ -69,11 +72,11 @@ plugins:
   cloudflare1:
     type: exec
     command: "/usr/local/bin/stunmesh-cloudflare"
-    args: ["-zone", "example.com", "-token", "${CLOUDFLARE_API_TOKEN}", "-subdomain", "wg"]
+    args: ["-zone", "example.com", "-token", "<CLOUDFLARE_API_TOKEN>", "-subdomain", "wg"]
   cloudflare2:
     type: exec
     command: "/usr/local/bin/stunmesh-cloudflare"
-    args: ["-zone", "example.com", "-token", "${CLOUDFLARE2_API_TOKEN}"]
+    args: ["-zone", "example.com", "-token", "<CLOUDFLARE2_API_TOKEN>"]
   exec_plugin1:
     type: exec
     command: "python3"
