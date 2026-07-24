@@ -63,6 +63,10 @@ const config = {
             label: 'Docs',
           },
           {
+            type: 'docsVersionDropdown',
+            position: 'right',
+          },
+          {
             href: 'https://github.com/tjjh89017/stunmesh-go',
             label: 'GitHub',
             position: 'right',
