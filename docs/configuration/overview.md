@@ -88,7 +88,8 @@ plugins:
 | Field | Description |
 |---|---|
 | `refresh_interval` | How often endpoints are re-discovered, re-published, and re-established (Go duration string, e.g. `"1m"`). |
-| `log.level` | Log verbosity (e.g. `info`, `debug`). |
+| `log.level` | Log verbosity: `trace`, `debug`, `info` (default), `warn`, `error`, `fatal`, `panic`, or `disabled`. An unrecognized value is a startup error. |
+| `log.format` | `console` (default, human-readable) or `json` (one object per line, for log aggregation). |
 | `interfaces` | WireGuard interfaces to manage, each with its [protocol](protocols.md#interface-protocol) and peer list. |
 | `stun` | STUN server(s) for endpoint discovery — see [STUN Servers](stun-servers.md). |
 | `ping_monitor` | Global defaults for [ping monitoring](ping-monitoring.md). |
