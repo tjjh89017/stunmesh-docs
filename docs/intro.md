@@ -33,9 +33,10 @@ For best results, ensure at least one peer is behind a cone NAT type.
 
 ## Supported platforms
 
-- **Linux** (amd64, arm, arm64, mipsle) — normal and UPX-compressed binaries
-- **macOS** (amd64, arm64) — normal binaries only
-- **FreeBSD** (amd64, arm64) — normal binaries only, requires `wireguard-tools`
+- **Linux** (amd64, arm, arm64, mipsle)
+- **macOS** (amd64, arm64)
+- **FreeBSD** (amd64, arm64) — requires `wireguard-tools`
+- **Windows** (amd64, arm64) — requires the official WireGuard for Windows client; see the [Windows guide](guides/windows.md)
 
 :::important
 
@@ -57,6 +58,7 @@ On macOS only wireguard-go is supported. The WireGuard App Store version is not 
 - FreeBSD 14.3-RELEASE (built-in WireGuard kernel module, with wireguard-tools installed)
 - OPNsense 25.1 (built-in WireGuard)
 - EdgeRouter X (EdgeOS 3.0.0)
+- Windows 11 25H2 (WireGuard for Windows 1.1)
 
 ## Talks and presentations
 
@@ -66,7 +68,6 @@ On macOS only wireguard-go is supported. The WireGuard App Store version is not 
 
 ## Roadmap
 
-- One-shot command mode
 - Auto execution when the routing engine notifies a change
 
 ## License

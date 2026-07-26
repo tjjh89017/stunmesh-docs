@@ -18,16 +18,30 @@ On FreeBSD and macOS, use GNU Make (`gmake`) to build.
 
 A direct `go build -o stunmesh-go` also works and picks the same per-platform defaults.
 
+The built binary reports its version with `--version` — the tag when built at one, a pseudo-version otherwise (the Go toolchain stamps it from the git metadata; no build flags needed).
+
 ## Build options
 
 **Binary minimization:**
 
-| Variable | Effect |
-|---|---|
-| `STRIP=1` | Strip debug symbols from the binary (reduces size) |
-| `TRIMPATH=1` | Remove file system paths from the binary (improves reproducibility) |
-| `UPX=1` | Compress the binary with UPX (requires `upx` to be installed) |
-| `EXTRA_MIN=1` | All of the above (STRIP + TRIMPATH + UPX) |
+| Variable | Default | Effect |
+|---|---|---|
+| `STRIP=1` | on | Strip debug symbols (`-s -w`, ~30% smaller). Panic traces and pprof still work; set `STRIP=0` for a binary delve/gdb can debug |
+| `TRIMPATH=1` | on | Remove file system paths from the binary (reproducible builds) |
+| `UPX=1` | off | Compress the binary with UPX (requires `upx` to be installed) |
+| `EXTRA_MIN=1` | off | All of the above (STRIP + TRIMPATH + UPX) |
+
+:::note
+
+UPX-packed binaries decompress wholesale into RAM at exec and cannot be demand-paged. On embedded targets with a compressed filesystem (JFFS2, squashfs) the plain binary is already compressed on flash and still served through the page cache — prefer that over UPX there.
+
+:::
+
+**Embedded CA bundle:**
+
+| Variable | Default | Effect |
+|---|---|---|
+| `EMBED_CA=1` | off | Embed the Mozilla root CA bundle (build tag `embedca`, ~160KB). Used **only** when the system provides no certificate store, so HTTPS plugins work on minimal images (OpenWrt before 21.02, bare buildroot) without a ca-certificates package |
 
 ### Built-in plugin options
 
@@ -41,38 +55,34 @@ A direct `go build -o stunmesh-go` also works and picks the same per-platform de
 **Examples:**
 
 ```bash
-# Normal build (includes all built-in plugins by default)
+# Normal build (stripped, trimpath, all built-in plugins)
 make build
+
+# Debuggable binary (keep symbols and DWARF)
+make build STRIP=0
 
 # Build without any built-in plugins (minimal binary)
 make build BUILTIN=
 
-# Build with stripped symbols
-make build STRIP=1
+# Self-contained HTTPS for images without ca-certificates
+make build EMBED_CA=1
 
-# Build with all minimizations (strip, trimpath, and UPX compression)
-make build EXTRA_MIN=1
+# Minimal binary without built-in plugins
+make all BUILTIN=
 
-# Clean and build with extra minimization
-make all EXTRA_MIN=1
-
-# Build minimal binary without built-in plugins
-make all BUILTIN= EXTRA_MIN=1
-
-# Build with specific built-in plugin only
-make all BUILTIN=builtin_cloudflare EXTRA_MIN=1
+# Specific built-in plugin only
+make all BUILTIN=builtin_cloudflare
 ```
 
 **Platform notes:**
 
 - CGO is disabled for all default builds, on every platform (produces static binaries). See [Backend Selection](#backend-selection) for the one case that needs it.
-- UPX compression significantly reduces binary size but requires the `upx` tool.
 
 **Release binaries:**
 
-- **Linux**: both normal and `-upx` suffixed binaries are provided (built with `EXTRA_MIN=1`)
-- **macOS**: normal binaries only
-- **FreeBSD**: normal binaries only
+- **Linux**: `stunmesh-linux-<arch>-<tag>`, plus a `-ca` variant (`stunmesh-linux-<arch>-ca-<tag>`) built with `EMBED_CA=1` for images without a CA store
+- **macOS, FreeBSD**: normal binaries only
+- **Windows**: shipped as `stunmesh-windows-<arch>-<tag>.zip`
 
 ## Contrib plugins
 
@@ -80,7 +90,7 @@ make all BUILTIN=builtin_cloudflare EXTRA_MIN=1
 make plugin    # or: make contrib
 ```
 
-Builds all standalone plugins under `contrib/` (Cloudflare DNS, OpenDHT). See [Storage Plugins](../plugins/overview.md#contrib-plugins).
+Builds all standalone plugins under `contrib/` (Cloudflare DNS, OpenDHT, and their shell-script variants). See [Storage Plugins](../plugins/overview.md#contrib-plugins).
 
 ## Backend selection
 
@@ -93,7 +103,7 @@ Each platform selects its own default, so a plain `make build` or `go build` nee
 
 | Platform | Default backend | CGO |
 | --- | --- | --- |
-| Linux, macOS | `wgctrl` | disabled |
+| Linux, macOS, Windows | `wgctrl` | disabled |
 | FreeBSD | `wgcli` | disabled |
 
 FreeBSD defaults to `wgcli` because its `wgctrl` support requires CGO, which cannot be cross-compiled without a sysroot. Every released binary is therefore `CGO_ENABLED=0`.
