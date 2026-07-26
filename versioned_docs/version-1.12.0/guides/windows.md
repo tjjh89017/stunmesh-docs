@@ -27,12 +27,6 @@ Because the proxy owns the outward socket for the life of the process, the publi
 .\stunmesh.exe -c C:\stunmesh\config.yaml
 ```
 
-4. Allow inbound UDP for the executable. The rule must be **per-program, not per-port** — the public port is ephemeral by design and changes on every restart:
-
-```powershell
-netsh advfirewall firewall add rule name="stunmesh" dir=in action=allow protocol=UDP program="C:\stunmesh\stunmesh.exe" enable=yes
-```
-
 The configuration file is unchanged from the other platforms; see [Configuration](../configuration/overview.md).
 
 ## Fixed outer port
