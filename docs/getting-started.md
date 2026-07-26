@@ -18,7 +18,7 @@ To build from source instead, see [Building from Source](reference/build.md).
 
 ## Run
 
-stunmesh-go needs raw socket access, so run it as root:
+On Linux, macOS, and FreeBSD, stunmesh-go needs raw socket access, so run it as root (Windows differs — see the [Windows guide](guides/windows.md)):
 
 ```bash
 sudo ./stunmesh-go
@@ -92,4 +92,4 @@ BindsTo=wg-quick@wg0.service
 - Configure [IPv6 or dual-stack discovery](configuration/protocols.md)
 - Add [STUN server fallback](configuration/stun-servers.md)
 - Enable [ping monitoring](configuration/ping-monitoring.md) for automatic recovery
-- Follow a full walkthrough: [VyOS site-to-site](guides/vyos.md) or [macOS behind LTE](guides/macos.md)
+- Follow a full walkthrough: [VyOS site-to-site](guides/vyos.md), [macOS behind LTE](guides/macos.md), or [Windows](guides/windows.md)

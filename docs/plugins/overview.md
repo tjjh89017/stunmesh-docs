@@ -78,9 +78,11 @@ plugins:
 
 ## Contrib plugins
 
-Standalone exec plugins live in the [`contrib/`](https://github.com/tjjh89017/stunmesh-go/tree/main/contrib) directory of the main repository:
+Standalone plugins live in the [`contrib/`](https://github.com/tjjh89017/stunmesh-go/tree/main/contrib) directory of the main repository:
 
-- **Cloudflare DNS**: stores peer information in Cloudflare DNS TXT records — [contrib/cloudflare/README.md](https://github.com/tjjh89017/stunmesh-go/blob/main/contrib/cloudflare/README.md)
-- **OpenDHT**: stores peer information in the OpenDHT distributed hash table — [contrib/opendht/README.md](https://github.com/tjjh89017/stunmesh-go/blob/main/contrib/opendht/README.md)
+- **Cloudflare DNS** (`exec`): stores peer information in Cloudflare DNS TXT records — [contrib/cloudflare/README.md](https://github.com/tjjh89017/stunmesh-go/blob/main/contrib/cloudflare/README.md)
+- **OpenDHT** (`exec`): stores peer information in the OpenDHT distributed hash table — [contrib/opendht/README.md](https://github.com/tjjh89017/stunmesh-go/blob/main/contrib/opendht/README.md)
+- **Cloudflare DNS shell** (`shell`): shell-script variant of the Cloudflare plugin — [contrib/cloudflare-shell](https://github.com/tjjh89017/stunmesh-go/tree/main/contrib/cloudflare-shell)
+- **OpenDHT shell** (`shell`): OpenDHT without the `jq` dependency — POSIX `sh`, `sed`, `base64` and `curl` or `wget` are enough, so a default OpenWrt image (busybox + `uclient-fetch`) runs it as-is — [contrib/opendht-shell/README.md](https://github.com/tjjh89017/stunmesh-go/blob/main/contrib/opendht-shell/README.md)
 
-Build them with `make plugin` from the repository root and reference them as exec plugins in your configuration. Community plugins are welcome.
+Build them with `make plugin` from the repository root and reference them with their plugin type in your configuration. Community plugins are welcome.

@@ -105,6 +105,7 @@ Each entry under `interfaces:` is keyed by the WireGuard interface name (`wg0`, 
 | `protocol` | no | Which families to run STUN discovery for — `ipv4` (default), `ipv6`, or `dualstack`. See [Interface Protocol](protocols.md#interface-protocol). |
 | `listen_interfaces` | no | FreeBSD/macOS only. Underlay interfaces to capture STUN responses on. Empty (default) means all eligible interfaces. See [Restricting listen interfaces](../reference/platform-internals.md#restricting-listen-interfaces). |
 | `listen_default_route` | no | FreeBSD/macOS only. Also capture on the default-route interface, resolved per-protocol. Defaults to `false`. Additive with `listen_interfaces`. |
+| `proxy.listen` | no | Windows only. Fixed outer UDP port for the [proxy](../guides/windows.md#fixed-outer-port); `0` or absent means an ephemeral port. Validated but otherwise ignored on other platforms. |
 
 :::note
 

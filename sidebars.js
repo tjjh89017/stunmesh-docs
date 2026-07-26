@@ -31,6 +31,7 @@ const sidebars = {
       items: [
         'guides/vyos',
         'guides/macos',
+        'guides/windows',
         'guides/dynamic-routing',
       ],
     },
