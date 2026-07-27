@@ -13,6 +13,7 @@ const sidebars = {
         'configuration/protocols',
         'configuration/stun-servers',
         'configuration/ping-monitoring',
+        'configuration/proxy',
       ],
     },
     {
@@ -33,6 +34,7 @@ const sidebars = {
         'guides/macos',
         'guides/windows',
         'guides/dynamic-routing',
+        'guides/full-tunnel',
       ],
     },
     {

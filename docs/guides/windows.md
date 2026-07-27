@@ -31,7 +31,7 @@ The configuration file is unchanged from the other platforms; see [Configuration
 
 ## Fixed outer port
 
-The proxy needs no configuration of its own. Set `interfaces.<name>.proxy.listen` only if you need a fixed outer port — for a port forward on the router, or a port-based firewall:
+The proxy needs no configuration of its own — `interfaces.<name>.proxy.enabled` defaults to `true` on Windows, since it's the only mode available. Set `proxy.listen` only if you need a fixed outer port — for a port forward on the router, or a port-based firewall:
 
 ```yaml
 interfaces:
@@ -42,7 +42,7 @@ interfaces:
       ...
 ```
 
-On the other platforms the key is ignored — there is no proxy to configure.
+Linux, macOS, and FreeBSD share their WireGuard socket directly by default and ignore `proxy.listen` unless they also opt into proxy mode — see [Proxy Mode](../configuration/proxy.md) and the [Full Tunnel guide](full-tunnel.md).
 
 ## Limitations
 
