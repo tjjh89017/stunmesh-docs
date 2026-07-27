@@ -22,7 +22,7 @@ So on Linux, stunmesh-go reads the device's fwmark and applies it to the probe s
 
 Two caveats:
 
-- **It does not make an exit-node / full-tunnel setup work on its own.** stunmesh-go never touches the routing table. The `ip rule` and routing table entries that consume the mark are `wg-quick`'s job (or yours). stunmesh-go only makes sure its probe joins the traffic class WireGuard already put itself in.
+- **It does not make an exit-node / full-tunnel setup work on its own.** stunmesh-go never touches the routing table. The `ip rule` and routing table entries that consume the mark are `wg-quick`'s job (or yours). stunmesh-go only makes sure its probe (and, in [proxy mode](../configuration/proxy.md), its outer sockets) joins the traffic class WireGuard already put itself in. See the [Full Tunnel guide](../guides/full-tunnel.md) for the complete per-platform picture.
 - **`SO_MARK` is Linux-only.** FreeBSD and macOS have no equivalent, so the probe socket cannot be pinned to the device's routing path there.
 
 ## FreeBSD and macOS (BSD-based systems)
