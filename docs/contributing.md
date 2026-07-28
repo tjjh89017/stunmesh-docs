@@ -1,10 +1,10 @@
 ---
 id: contributing
-title: Contributing
+title: Contribute
 sidebar_position: 99
 ---
 
-# Contributing
+# Contribute
 
 Contributions to stunmesh projects are welcome. Every pull request must pass two independent checks: the **DCO sign-off** on each commit, and the **CLA** signed once per contributor.
 
