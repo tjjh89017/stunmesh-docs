@@ -45,6 +45,7 @@ const sidebars = {
         'reference/platform-internals',
       ],
     },
+    'contributing',
   ],
 };
 
