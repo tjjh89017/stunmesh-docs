@@ -10,6 +10,18 @@ A "full tunnel" WireGuard peer routes *all* traffic through the tunnel — its `
 
 Each platform escapes a covering default differently, and on some it requires opting into [proxy mode](../configuration/proxy.md).
 
+:::caution Storage plugin traffic does not escape yet
+
+The escape described on this page covers stunmesh-go's STUN probes and, in proxy mode, the relayed WireGuard packets. It does **not** yet cover the requests a storage plugin makes to its backend.
+
+On a full tunnel that is a deadlock rather than a slow path: the call that fetches a peer's endpoint is routed into the tunnel that endpoint would bring up. It bites hardest on recovery — once a peer's endpoint changes the tunnel is broken, and repairing it needs the very call the broken tunnel is swallowing.
+
+So a full tunnel needs explicit exclusion routes for the storage backend and for the resolver, so that traffic leaves through the physical path. Treat full tunnel as usable, but as something that needs this manual step rather than working out of the box.
+
+Outside Linux the escape is exercised far less, so treat full tunnel on macOS, FreeBSD and Windows as lightly tested.
+
+:::
+
 ## Linux — raw-socket mode (default)
 
 Full tunnel is supported today without proxy mode. The pattern:
