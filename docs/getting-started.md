@@ -8,11 +8,15 @@ sidebar_position: 2
 
 ## Install
 
-**Download a release binary** from the [releases page](https://github.com/tjjh89017/stunmesh-go/releases) for your platform, or **use the container image**:
+**Download a release binary** from the [releases page](https://github.com/tjjh89017/stunmesh-go/releases) for your platform, or **use the container image**, published to both Docker Hub and GitHub Container Registry:
 
 ```bash
 docker pull tjjh89017/stunmesh
+# or
+docker pull ghcr.io/tjjh89017/stunmesh
 ```
+
+Release tags (e.g. `v1.13.0`) are available on both registries; `latest` always points at the newest stable release — release candidates (`-rc*` tags) never move it.
 
 To build from source instead, see [Building from Source](reference/build.md).
 
