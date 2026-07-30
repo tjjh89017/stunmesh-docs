@@ -37,6 +37,13 @@ For best results, ensure at least one peer is behind a cone NAT type.
 - **macOS** (amd64, arm64)
 - **FreeBSD** (amd64, arm64) — requires `wireguard-tools`
 - **Windows** (amd64, arm64) — requires the official WireGuard for Windows client; see the [Windows guide](guides/windows.md)
+- **Android** — a separate app, [stunmesh-android](https://github.com/tjjh89017/stunmesh-android), which embeds this project's STUN core alongside a userspace WireGuard implementation and runs as a VPN service (no root required)
+
+:::note
+
+stunmesh-android is in early development. Install it by sideloading the universal APK from its [releases page](https://github.com/tjjh89017/stunmesh-android/releases). Only the built-in storage plugins are available there, and exempting the app from battery optimization is recommended for long-lived tunnels.
+
+:::
 
 :::important
 

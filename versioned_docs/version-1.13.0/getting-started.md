@@ -20,6 +20,8 @@ Release tags (e.g. `v1.13.0`) are published alongside `latest`, which always poi
 
 To build from source instead, see [Building from Source](reference/build.md).
 
+On Android, use the separate [stunmesh-android](https://github.com/tjjh89017/stunmesh-android) app and sideload the universal APK from its [releases page](https://github.com/tjjh89017/stunmesh-android/releases); the rest of this page covers the desktop/server binary.
+
 ## Run
 
 On Linux, macOS, and FreeBSD, stunmesh-go needs raw socket access, so run it as root (Windows differs — see the [Windows guide](guides/windows.md)):
