@@ -30,6 +30,12 @@ On Linux, macOS, and FreeBSD, stunmesh-go needs raw socket access, so run it as 
 sudo ./stunmesh-go
 ```
 
+On Linux, instead of running as root you can grant just the two capabilities it needs:
+
+```bash
+setcap cap_net_admin,cap_net_raw+ep ./stunmesh-go
+```
+
 It expects an already-configured WireGuard interface (e.g. brought up with `wg-quick`) and a `config.yaml` describing the interface, its peers, and a storage plugin.
 
 ## Configuration file
