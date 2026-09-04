@@ -18,7 +18,7 @@ The Docker Hub mirror (`tjjh89017/stunmesh`) is deprecated and will be **deleted
 
 Release tags (e.g. `v1.15.0`) are published alongside `latest`, which always points at the newest stable release — release candidates (`-rc*` tags) never move it.
 
-On OpenWrt, use the installer script instead of downloading a binary by hand — see the [OpenWrt guide](guides/openwrt.md).
+On OpenWrt, install from the package feed — see the [OpenWrt guide](guides/openwrt.md).
 
 To build from source instead, see [Building from Source](reference/build.md).
 
