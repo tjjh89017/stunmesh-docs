@@ -35,6 +35,7 @@ const sidebars = {
         'guides/windows',
         'guides/dynamic-routing',
         'guides/full-tunnel',
+        'guides/openwrt',
       ],
     },
     {
