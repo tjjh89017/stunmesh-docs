@@ -6,9 +6,27 @@ sidebar_position: 6
 
 # OpenWrt
 
-stunmesh-go ships an installer script for OpenWrt routers. It detects the router's architecture, downloads the matching release binary, and installs a procd init script.
+stunmesh-go publishes a signed apk package feed for OpenWrt 25.12 and SNAPSHOT. On OpenWrt 24.10, which ships Go 1.23, use the installer script instead.
 
-## Install
+## Install from the package feed
+
+On the router:
+
+```sh
+wget -O /etc/apk/keys/stunmesh.pem https://tjjh89017.github.io/stunmesh-openwrt/stunmesh.pem
+. /etc/os-release
+echo "https://tjjh89017.github.io/stunmesh-openwrt/openwrt-25.12/$OPENWRT_ARCH/packages.adb" \
+  > /etc/apk/repositories.d/stunmesh.list
+apk update
+apk add stunmesh-go
+vi /etc/stunmesh/config.yaml
+service stunmesh enable
+service stunmesh start
+```
+
+Replace `openwrt-25.12` with `SNAPSHOT` to track snapshot builds instead. The `stunmesh-go` package pulls in `kmod-wireguard` and `ca-bundle`, and is built with the `builtin_all` tag so the Cloudflare and OpenDHT storage plugins are included; the config lives at `/etc/stunmesh/config.yaml` and the init script at `/etc/init.d/stunmesh`. The same feed also ships `stunmesh-agent` and `stunmesh-provd` for the separate stunmesh-provisioner project — see [stunmesh-openwrt](https://github.com/tjjh89017/stunmesh-openwrt) for those.
+
+## OpenWrt 24.10: installer script
 
 On the router:
 
@@ -29,7 +47,7 @@ This installs the binary to `/usr/bin/stunmesh-go`, writes `/etc/init.d/stunmesh
 /etc/init.d/stunmesh start
 ```
 
-## Environment overrides
+### Environment overrides
 
 | Variable | Effect |
 |---|---|
@@ -39,11 +57,7 @@ This installs the binary to `/usr/bin/stunmesh-go`, writes `/etc/init.d/stunmesh
 | `STUNMESH_BIN_DIR` | Install directory for the binary (default `/usr/bin`). |
 | `STUNMESH_PURGE` | Uninstall only: set to `1` to also delete `/etc/stunmesh`, including the live config. |
 
-## The `-ca` release variant
-
-By default the installer fetches the `-ca` binary, which embeds a Mozilla CA fallback bundle for the binary's own outbound TLS (the Cloudflare API, an HTTPS OpenDHT proxy). Most OpenWrt images don't ship the `ca-bundle` package, so without the embedded bundle those HTTPS storage plugins would fail. Set `STUNMESH_NO_CA=1` if the router already has `ca-bundle` installed and you'd rather use the smaller plain binary.
-
-## Uninstall
+To uninstall:
 
 ```sh
 wget -qO- https://raw.githubusercontent.com/tjjh89017/stunmesh-go/main/scripts/openwrt-install.sh | sh -s -- uninstall
@@ -51,6 +65,4 @@ wget -qO- https://raw.githubusercontent.com/tjjh89017/stunmesh-go/main/scripts/o
 
 This stops and removes the service and binary, and keeps `/etc/stunmesh` unless `STUNMESH_PURGE=1` is set.
 
-## MIPS notes
-
-Release builds include both little-endian (`mipsle`) and big-endian (`mips`) MIPS binaries, all built with soft-float.
+By default the script fetches the `-ca` binary, since most OpenWrt images don't ship the `ca-bundle` package that outbound TLS (Cloudflare API, HTTPS OpenDHT proxy) needs. Set `STUNMESH_NO_CA=1` if the router already has `ca-bundle` installed and you'd rather use the smaller plain binary. Release builds include both little-endian (`mipsle`) and big-endian (`mips`) MIPS binaries, all built with soft-float.
