@@ -28,6 +28,8 @@ plugins:
 | `token` | yes | API token with DNS edit permission for the zone. The value is used literally — env vars are not expanded. |
 | `subdomain` | no | Subdomain under which records are created. |
 
+This plugin always embeds a Mozilla CA fallback bundle, so TLS to the Cloudflare API works even on minimal systems (OpenWrt, scratch containers) that don't ship a `ca-certificates` package.
+
 ## OpenDHT
 
 Stores endpoints in the [OpenDHT](https://github.com/savoirfairelinux/opendht) distributed hash table through an OpenDHT proxy server's REST API. It needs no account, token, or quota, since there is no operator.
