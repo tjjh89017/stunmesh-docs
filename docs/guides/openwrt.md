@@ -41,7 +41,7 @@ This installs the binary to `/usr/bin/stunmesh-go`, writes `/etc/init.d/stunmesh
 
 ## The `-ca` release variant
 
-By default the installer fetches the `-ca` binary, which embeds a Mozilla CA fallback bundle. Most OpenWrt images don't ship the `ca-bundle` package, so without it TLS to the GitHub releases API and to any HTTPS storage plugin (Cloudflare DNS, an OpenDHT proxy) would fail. Set `STUNMESH_NO_CA=1` if the router already has `ca-bundle`/`libustream-mbedtls` installed and you'd rather use the smaller plain binary.
+By default the installer fetches the `-ca` binary, which embeds a Mozilla CA fallback bundle for the binary's own outbound TLS (the Cloudflare API, an HTTPS OpenDHT proxy). Most OpenWrt images don't ship the `ca-bundle` package, so without the embedded bundle those HTTPS storage plugins would fail. Set `STUNMESH_NO_CA=1` if the router already has `ca-bundle` installed and you'd rather use the smaller plain binary.
 
 ## Uninstall
 
@@ -53,4 +53,4 @@ This stops and removes the service and binary, and keeps `/etc/stunmesh` unless 
 
 ## MIPS notes
 
-Release builds now include big-endian MIPS (`mips`) alongside the existing little-endian (`mipsle`) builds. The installer tells the two apart by probing an ELF header on the router, since `uname -m` reports plain `mips` for both. All MIPS builds default to soft-float.
+Release builds include both little-endian (`mipsle`) and big-endian (`mips`) MIPS binaries, all built with soft-float.
