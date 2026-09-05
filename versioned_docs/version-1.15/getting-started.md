@@ -6,13 +6,13 @@ sidebar_position: 2
 
 # Getting Started
 
-This page walks through building a WireGuard tunnel between two Linux hosts (node A and node B) that each sit behind NAT, with no public IP on either side. stunmesh-go discovers each node's real (STUN-derived) endpoint and publishes it through Cloudflare DNS, so the other node can find it and WireGuard can establish a direct tunnel.
+This page walks through building a WireGuard tunnel between two Linux hosts (node A and node B) that each sit behind NAT, with no public IP on either side. stunmesh-go discovers each node's real (STUN-derived) endpoint and publishes it into the OpenDHT distributed hash table, so the other node can find it and WireGuard can establish a direct tunnel.
 
 Prerequisites:
 
 - Root access on both nodes.
 - `wireguard-tools` installed on both nodes.
-- A Cloudflare zone (a domain managed by Cloudflare) and an API token with DNS edit permission for that zone.
+- Network access to at least one OpenDHT proxy endpoint (e.g. `https://dhtproxy2.jami.net`) — no account, token, or quota needed.
 
 ## Install stunmesh-go
 
@@ -101,7 +101,7 @@ Configuration is loaded from the first of these paths that exists (each director
 
 You can also point stunmesh-go at a specific file with `-c <file>` (aliases: `--config`), or at a directory with `--config-dir <dir>`. An explicitly given file or directory must exist — there is no fallback to the default search paths.
 
-Write `/etc/stunmesh/config.yaml` on node A, using the built-in Cloudflare plugin. Node A's peer entry describes node B:
+Write `/etc/stunmesh/config.yaml` on node A, using the built-in OpenDHT plugin. Node A's peer entry describes node B:
 
 ```yaml
 ---
@@ -113,19 +113,19 @@ interfaces:
     peers:
       "NODE_B":
         public_key: "<NODE_B_PUBLIC_KEY>"
-        plugin: cf
+        plugin: dht
 stun:
   addresses: ["stun.l.google.com:19302"]
 plugins:
-  cf:
+  dht:
     type: builtin
-    name: cloudflare
-    zone: example.com
-    token: "<CLOUDFLARE_API_TOKEN>"
-    subdomain: wg
+    name: opendht
+    endpoints:
+      - https://dhtproxy2.jami.net
+      - https://dhtproxy3.jami.net
 ```
 
-On node B, write the same file with the peer name and public key swapped to describe node A instead (`"NODE_A"` with `<NODE_A_PUBLIC_KEY>`); `zone`, `token`, and `subdomain` stay the same on both nodes, since both publish into the same Cloudflare zone.
+On node B, write the same file with the peer name and public key swapped to describe node A instead (`"NODE_A"` with `<NODE_A_PUBLIC_KEY>`); `endpoints` stays the same on both nodes, since both publish into the same OpenDHT proxies.
 
 The full option reference lives in [Configuration](configuration/overview.md), and the storage backends in [Storage Plugins](plugins/overview.md).
 
