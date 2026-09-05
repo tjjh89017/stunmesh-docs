@@ -76,7 +76,7 @@ On macOS only wireguard-go is supported. The WireGuard App Store version is not 
 
 ## Roadmap
 
-- Auto execution when the routing engine notifies a change
+Planned work and open feature requests are tracked in the [stunmesh-go issue tracker](https://github.com/tjjh89017/stunmesh-go/issues).
 
 ## License
 
