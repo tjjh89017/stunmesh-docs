@@ -64,6 +64,7 @@ On macOS only wireguard-go is supported. The WireGuard App Store version is not 
 - macOS wireguard-go 0.0.20230223, wireguard-tools 1.0.20210914
 - FreeBSD 14.3-RELEASE (built-in WireGuard kernel module, with wireguard-tools installed)
 - OPNsense 25.1 (built-in WireGuard)
+- OpenWrt 25.12 (kmod-wireguard from apk)
 - EdgeRouter X (EdgeOS 3.0.0)
 - Windows 11 25H2 (WireGuard for Windows 1.1)
 
