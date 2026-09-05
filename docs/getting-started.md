@@ -6,7 +6,15 @@ sidebar_position: 2
 
 # Getting Started
 
-## Install
+This page walks through building a WireGuard tunnel between two Linux hosts (node A and node B) that each sit behind NAT, with no public IP on either side. stunmesh-go discovers each node's real (STUN-derived) endpoint and publishes it through Cloudflare DNS, so the other node can find it and WireGuard can establish a direct tunnel.
+
+Prerequisites:
+
+- Root access on both nodes.
+- `wireguard-tools` installed on both nodes.
+- A Cloudflare zone (a domain managed by Cloudflare) and an API token with DNS edit permission for that zone.
+
+## Install stunmesh-go
 
 **Download a release binary** from the [releases page](https://github.com/tjjh89017/stunmesh-go/releases) for your platform, or **use the container image**, published primarily to GitHub Container Registry:
 
@@ -24,7 +32,104 @@ To build from source instead, see [Building from Source](reference/build.md).
 
 On Android, use the separate [stunmesh-android](https://github.com/tjjh89017/stunmesh-android) app and sideload the universal APK from its [releases page](https://github.com/tjjh89017/stunmesh-android/releases); the rest of this page covers the desktop/server binary.
 
-## Run
+## Set up WireGuard
+
+stunmesh-go does not create the WireGuard interface itself — it manages the endpoint of an interface you already brought up. Set that up first with `wg-quick`.
+
+Install `wireguard-tools` on both node A and node B (e.g. `apt install wireguard-tools` on Debian/Ubuntu). Then, on each node, generate a key pair:
+
+```bash
+wg genkey | tee privatekey | wg pubkey > publickey
+```
+
+This writes the private key to `privatekey` and the public key to `publickey`. Do this on both nodes — you'll need each node's public key in the other node's config.
+
+### Node A: `/etc/wireguard/wg0.conf`
+
+```ini
+[Interface]
+PrivateKey = <NODE_A_PRIVATE_KEY>
+Address = 10.0.0.1/24
+ListenPort = 51820
+
+[Peer]
+PublicKey = <NODE_B_PUBLIC_KEY>
+AllowedIPs = 10.0.0.2/32
+PersistentKeepalive = 25
+```
+
+### Node B: `/etc/wireguard/wg0.conf`
+
+```ini
+[Interface]
+PrivateKey = <NODE_B_PRIVATE_KEY>
+Address = 10.0.0.2/24
+ListenPort = 51820
+
+[Peer]
+PublicKey = <NODE_A_PUBLIC_KEY>
+AllowedIPs = 10.0.0.1/32
+PersistentKeepalive = 25
+```
+
+Two details matter here:
+
+- **Pin `ListenPort` explicitly.** stunmesh-go reads the interface's listening port once at startup. If you leave `ListenPort` unset, the kernel picks a new random port every time the interface comes up, and stunmesh-go would keep probing and publishing a stale one.
+- **Do not set `Endpoint` in the `[Peer]` section.** Neither node has a stable, reachable address yet — that's the problem stunmesh-go solves. It discovers each side's real endpoint through STUN and sets it on the running interface itself.
+
+Bring the interface up on both nodes:
+
+```bash
+wg-quick up wg0
+systemctl enable --now wg-quick@wg0
+```
+
+Verify the interface exists and the peer is configured (no endpoint or handshake yet — that's expected before stunmesh-go runs):
+
+```bash
+wg show
+```
+
+## Write the stunmesh-go config
+
+Configuration is loaded from the first of these paths that exists (each directory is checked for `config.yaml`, then `config.yml`):
+
+- `$STUNMESH_CONFIG_DIR/config.yaml`
+- `/etc/stunmesh/config.yaml`
+- `~/.stunmesh/config.yaml`
+- `./config.yaml`
+
+You can also point stunmesh-go at a specific file with `-c <file>` (aliases: `--config`), or at a directory with `--config-dir <dir>`. An explicitly given file or directory must exist — there is no fallback to the default search paths.
+
+Write `/etc/stunmesh/config.yaml` on node A, using the built-in Cloudflare plugin. Node A's peer entry describes node B:
+
+```yaml
+---
+refresh_interval: "1m"
+log:
+  level: "info"
+interfaces:
+  wg0:
+    peers:
+      "NODE_B":
+        public_key: "<NODE_B_PUBLIC_KEY>"
+        plugin: cf
+stun:
+  addresses: ["stun.l.google.com:19302"]
+plugins:
+  cf:
+    type: builtin
+    name: cloudflare
+    zone: example.com
+    token: "<CLOUDFLARE_API_TOKEN>"
+    subdomain: wg
+```
+
+On node B, write the same file with the peer name and public key swapped to describe node A instead (`"NODE_A"` with `<NODE_A_PUBLIC_KEY>`); `zone`, `token`, and `subdomain` stay the same on both nodes, since both publish into the same Cloudflare zone.
+
+The full option reference lives in [Configuration](configuration/overview.md), and the storage backends in [Storage Plugins](plugins/overview.md).
+
+## Run stunmesh-go
 
 On Linux, macOS, and FreeBSD, stunmesh-go needs raw socket access, so run it as root (Windows differs — see the [Windows guide](guides/windows.md)):
 
@@ -38,46 +143,51 @@ On Linux, instead of running as root you can grant just the two capabilities it 
 setcap cap_net_admin,cap_net_raw+ep ./stunmesh-go
 ```
 
-It expects an already-configured WireGuard interface (e.g. brought up with `wg-quick`) and a `config.yaml` describing the interface, its peers, and a storage plugin.
+Run it in the foreground on both node A and node B first, so you can see what happens:
 
-## Configuration file
-
-Configuration is loaded from the first of these paths that exists (each directory is checked for `config.yaml`, then `config.yml`):
-
-- `$STUNMESH_CONFIG_DIR/config.yaml`
-- `/etc/stunmesh/config.yaml`
-- `~/.stunmesh/config.yaml`
-- `./config.yaml`
-
-You can also point stunmesh-go at a specific file with `-c <file>` (aliases: `--config`), or at a directory with `--config-dir <dir>`. An explicitly given file or directory must exist — there is no fallback to the default search paths.
-
-A minimal two-node setup using the built-in Cloudflare plugin:
-
-```yaml
----
-refresh_interval: "1m"
-log:
-  level: "info"
-interfaces:
-  wg0:
-    peers:
-      "PEER_B":
-        public_key: "<PEER_B_PUBLIC_KEY_BASE64>"
-        plugin: cf
-stun:
-  addresses: ["stun.l.google.com:19302"]
-plugins:
-  cf:
-    type: builtin
-    name: cloudflare
-    zone: example.com
-    token: "<CLOUDFLARE_API_TOKEN>"
-    subdomain: wg
+```bash
+sudo ./stunmesh-go
 ```
 
-Run the same setup on the other node (with this node's public key), wait roughly two refresh intervals, and the tunnel comes up. Verify with `wg show` or by pinging the peer's tunnel address.
+Wait roughly two refresh intervals (with `refresh_interval: "1m"` above, about two minutes). Then, on either node, check that the tunnel came up:
 
-The full option reference lives in [Configuration](configuration/overview.md), and the storage backends in [Storage Plugins](plugins/overview.md).
+```bash
+wg show
+```
+
+You should see an `endpoint` and a recent `latest handshake` for the peer. Confirm connectivity across the tunnel:
+
+```bash
+ping 10.0.0.2
+```
+
+(from node A; ping `10.0.0.1` from node B).
+
+## Run as a systemd service
+
+Once the foreground run works, stop it (Ctrl-C) and run stunmesh-go as a systemd service instead, tied to the WireGuard interface it manages:
+
+```ini
+# /etc/systemd/system/stunmesh-go.service
+[Unit]
+Description=stunmesh-go
+After=wg-quick@wg0.service
+BindsTo=wg-quick@wg0.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/stunmesh-go
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Adjust `ExecStart` to wherever you placed the binary. Enable and start it on both nodes:
+
+```bash
+systemctl enable --now stunmesh-go
+```
 
 ## When stunmesh-go must be restarted
 
