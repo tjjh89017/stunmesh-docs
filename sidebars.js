@@ -30,6 +30,7 @@ const sidebars = {
       type: 'category',
       label: 'Deployment Guides',
       items: [
+        'guides/linux-docker',
         'guides/vyos',
         'guides/macos',
         'guides/windows',

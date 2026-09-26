@@ -26,6 +26,8 @@ The Docker Hub mirror (`tjjh89017/stunmesh`) is deprecated and will be **deleted
 
 Release tags (e.g. `v1.15.0`) are published alongside `latest`, which always points at the newest stable release — release candidates (`-rc*` tags) never move it.
 
+For a complete two-host walkthrough using the container image with Docker Compose, see [Linux to Linux with Docker Compose](guides/linux-docker.md).
+
 On OpenWrt, install from the package feed — see the [OpenWrt guide](guides/openwrt.md).
 
 To build from source instead, see [Building from Source](reference/build.md).
@@ -216,4 +218,4 @@ BindsTo=wg-quick@wg0.service
 - Configure [IPv6 or dual-stack discovery](configuration/protocols.md)
 - Add [STUN server fallback](configuration/stun-servers.md)
 - Enable [ping monitoring](configuration/ping-monitoring.md) for automatic recovery
-- Follow a full walkthrough: [VyOS site-to-site](guides/vyos.md), [macOS behind LTE](guides/macos.md), or [Windows](guides/windows.md)
+- Follow a full walkthrough: [Linux to Linux with Docker Compose](guides/linux-docker.md), [VyOS site-to-site](guides/vyos.md), [macOS behind LTE](guides/macos.md), or [Windows](guides/windows.md)
