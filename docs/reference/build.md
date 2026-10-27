@@ -84,13 +84,18 @@ make all BUILTIN=builtin_cloudflare
 - **macOS, FreeBSD**: normal binaries only
 - **Windows**: shipped as `stunmesh-windows-<arch>-<tag>.zip`
 
-## Contrib plugins
+## External plugins
+
+The exec and shell plugins (Cloudflare DNS, OpenDHT, and their shell-script variants) live in the separate [stunmesh-plugins](https://github.com/tjjh89017/stunmesh-plugins) repository. It publishes no prebuilt binaries; build and install them from source:
 
 ```bash
-make plugin    # or: make contrib
+git clone https://github.com/tjjh89017/stunmesh-plugins.git
+cd stunmesh-plugins
+make build
+sudo make install    # installs the stunmesh-* plugins to /usr/local/bin
 ```
 
-Builds all standalone plugins under `contrib/` (Cloudflare DNS, OpenDHT, and their shell-script variants). See [Storage Plugins](../plugins/overview.md#contrib-plugins).
+See [Storage Plugins](../plugins/overview.md#external-plugins).
 
 ## Backend selection
 

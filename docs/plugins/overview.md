@@ -76,13 +76,13 @@ plugins:
 
 :::
 
-## Contrib plugins
+## External plugins
 
-Standalone plugins live in the [`contrib/`](https://github.com/tjjh89017/stunmesh-go/tree/main/contrib) directory of the main repository:
+Reference implementations of the exec and shell protocols live in the separate [stunmesh-plugins](https://github.com/tjjh89017/stunmesh-plugins) repository. They cover the same backends as the [built-in plugins](builtin.md), so most setups do not need them; use them as a starting point for your own backend, or when you want the plugin outside the stunmesh-go binary:
 
-- **Cloudflare DNS** (`exec`): stores peer information in Cloudflare DNS TXT records — [contrib/cloudflare/README.md](https://github.com/tjjh89017/stunmesh-go/blob/main/contrib/cloudflare/README.md)
-- **OpenDHT** (`exec`): stores peer information in the OpenDHT distributed hash table — [contrib/opendht/README.md](https://github.com/tjjh89017/stunmesh-go/blob/main/contrib/opendht/README.md)
-- **Cloudflare DNS shell** (`shell`): shell-script variant of the Cloudflare plugin — [contrib/cloudflare-shell](https://github.com/tjjh89017/stunmesh-go/tree/main/contrib/cloudflare-shell)
-- **OpenDHT shell** (`shell`): OpenDHT without the `jq` dependency — POSIX `sh`, `sed`, `base64` and `curl` or `wget` are enough, so a default OpenWrt image (busybox + `uclient-fetch`) runs it as-is — [contrib/opendht-shell/README.md](https://github.com/tjjh89017/stunmesh-go/blob/main/contrib/opendht-shell/README.md)
+- **Cloudflare DNS** (`exec`): stores peer information in Cloudflare DNS TXT records — [cloudflare/README.md](https://github.com/tjjh89017/stunmesh-plugins/blob/main/cloudflare/README.md)
+- **OpenDHT** (`exec`): stores peer information in the OpenDHT distributed hash table — [opendht/README.md](https://github.com/tjjh89017/stunmesh-plugins/blob/main/opendht/README.md)
+- **Cloudflare DNS shell** (`shell`): shell-script variant of the Cloudflare plugin — [cloudflare-shell](https://github.com/tjjh89017/stunmesh-plugins/tree/main/cloudflare-shell)
+- **OpenDHT shell** (`shell`): OpenDHT without the `jq` dependency — POSIX `sh`, `sed`, `base64` and `curl` or `wget` are enough, so a default OpenWrt image (busybox + `uclient-fetch`) runs it as-is — [opendht-shell/README.md](https://github.com/tjjh89017/stunmesh-plugins/blob/main/opendht-shell/README.md)
 
-Build them with `make plugin` from the repository root and reference them with their plugin type in your configuration. Community plugins are welcome.
+There are no prebuilt releases. Build them from source with `make build` in that repository (see [Building from Source](../reference/build.md#external-plugins)), or copy a shell script to the target host. Then reference them with their plugin type in your configuration. Community plugins are welcome.
