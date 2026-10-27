@@ -59,9 +59,10 @@ stun:
   address: "stun.l.google.com:19302"
 plugins:
   cloudflare_main:
-    type: exec
-    command: "/usr/local/bin/stunmesh-cloudflare"
-    args: ["-zone", "<ZONE_NAME>", "-token", "<API_TOKEN>"]
+    type: builtin
+    name: cloudflare
+    zone: "<ZONE_NAME>"
+    token: "<API_TOKEN>"
 ```
 
 ## Steps in Site B
@@ -98,9 +99,10 @@ stun:
   address: "stun.l.google.com:19302"
 plugins:
   cloudflare_main:
-    type: exec
-    command: "/usr/local/bin/stunmesh-cloudflare"
-    args: ["-zone", "<ZONE_NAME>", "-token", "<API_TOKEN>"]
+    type: builtin
+    name: cloudflare
+    zone: "<ZONE_NAME>"
+    token: "<API_TOKEN>"
 ```
 
 ## Verify
