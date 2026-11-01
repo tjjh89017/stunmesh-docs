@@ -9,7 +9,7 @@ sidebar_position: 1
 
 STUNMESH-go is a WireGuard helper tool that establishes peer-to-peer connections through NAT — without any self-hosted coordination infrastructure.
 
-It discovers each node's public IP and port via STUN, encrypts the endpoint information, and shares it through a pluggable storage backend (Cloudflare DNS, OpenDHT, or your own script). Every node reads its peers' endpoints from the same storage and configures WireGuard accordingly. No rendezvous server, no relay, no VPS in the middle.
+It discovers each node's public IP and port via STUN, encrypts the endpoint information, and shares it through a pluggable storage backend (Cloudflare DNS, OpenDHT, your own script, or your own Go plugin). Every node reads its peers' endpoints from the same storage and configures WireGuard accordingly. No rendezvous server, no relay, no VPS in the middle.
 
 Inspired by manuels' [wireguard-p2p](https://github.com/manuels/wireguard-p2p) project.
 

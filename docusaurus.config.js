@@ -34,6 +34,11 @@ const config = {
           routeBasePath: '/',
           sidebarPath: './sidebars.js',
           editUrl: 'https://github.com/tjjh89017/stunmesh-docs/tree/main/',
+          lastVersion: 'current',
+          versions: {
+            current: {label: '1.16', path: ''},
+            '1.15': {banner: 'unmaintained'},
+          },
         },
         blog: false,
         theme: {

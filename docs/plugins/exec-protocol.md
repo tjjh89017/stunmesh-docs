@@ -19,9 +19,23 @@ The exec plugin communicates with external programs using JSON over stdin/stdout
 {
   "action": "get|set",
   "key": "peer_identifier_sha1_hex",
-  "value": "encrypted_data_for_set_action"
+  "value": "encrypted_data_for_set_action",
+  "device": "wg0",
+  "local_public_key": "base64_wireguard_public_key",
+  "peer_public_key": "base64_wireguard_public_key"
 }
 ```
+
+| Field | Description |
+|---|---|
+| `action` | `get` or `set`. |
+| `key` | Storage key: SHA-1 hex. On `set` it is the local peer id; on `get` it is the remote peer id. |
+| `value` | Encrypted endpoint data, hex. Sent on `set` only. |
+| `device` | New in v1.16.0. WireGuard interface or tunnel name. |
+| `local_public_key` | New in v1.16.0. This host's WireGuard public key, base64. |
+| `peer_public_key` | New in v1.16.0. The remote peer's WireGuard public key, base64. |
+
+The three new fields are optional for scripts. Each is omitted when stunmesh does not know it. A script that ignores unknown fields keeps working unchanged. Use them when your backend should address records by WireGuard identity instead of only by `key`. The private key is never sent.
 
 **Response format:**
 

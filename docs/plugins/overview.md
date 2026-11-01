@@ -40,11 +40,57 @@ stunmesh-go supports three plugin types. All are fully supported and production-
 | [`exec`](exec-protocol.md) | External process | JSON over stdin/stdout | Complex plugins, any language |
 | [`shell`](shell-protocol.md) | External process | Shell variables over stdin | Simple shell scripts |
 
-**Built-in** (`type: builtin`) — compiled directly into the stunmesh-go binary using build tags. Single binary, no external processes, no IPC overhead, faster startup, and an 83% smaller deployment size (2.2 MB vs 13.6 MB with external plugins). Available built-ins: `cloudflare`, `opendht`.
+**Built-in** (`type: builtin`) — compiled directly into the stunmesh-go binary. Single binary, no external processes, no IPC overhead, faster startup. Available built-ins: `cloudflare`, `opendht`, and the chaining plugins `trace` and `mirror`. You can also [write your own built-in in Go](custom-binary.md) and build it into a custom binary.
 
 **Exec** (`type: exec`) — executes an external program speaking JSON over stdin/stdout. Plugins update independently of the main binary, can be written in any language, and are easier to debug and share.
 
 **Shell** (`type: shell`) — a simplified protocol for shell scripts: variables over stdin, plain text out. No JSON parsing required; ideal for quick prototyping and gluing to existing shell tools.
+
+## Chaining plugins
+
+New in v1.16.0. A plugin instance can wrap other instances defined under `plugins:`. The outer plugin names its inner instances in its own config field. Two built-ins work this way:
+
+- [`trace`](builtin.md#trace) wraps one instance (field `next`) and records each call.
+- [`mirror`](builtin.md#mirror) wraps several instances (field `stores`). It writes to all of them and reads from the first that answers.
+
+Inner instances can be of any type, including `exec` and `shell`. A peer still names one instance in `plugin:`, usually the outermost one.
+
+This example publishes to a local shell store and to OpenDHT. Every call to the shell store is traced to a file:
+
+```yaml
+plugins:
+  files:
+    type: shell
+    command: /usr/local/bin/stunmesh-file-store.sh
+
+  files_traced:
+    type: builtin
+    name: trace
+    next: files
+    file: /var/log/stunmesh-trace.jsonl
+
+  dht:
+    type: builtin
+    name: opendht
+    endpoints:
+      - https://dhtproxy2.jami.net
+      - https://dhtproxy3.jami.net
+
+  both:
+    type: builtin
+    name: mirror
+    stores: [files_traced, dht]
+    # No dedup here: dht is a TTL backend.
+
+interfaces:
+  wg0:
+    peers:
+      peer1:
+        public_key: "base64_encoded_key"
+        plugin: both
+```
+
+The chain is `both -> [files_traced -> files, dht]`. Startup fails when a chain names an undefined instance or forms a cycle, for example `plugin cycle: a -> b -> a`.
 
 ## What plugins store
 
@@ -59,6 +105,7 @@ Any plugin instance can set `dedup: true` to skip re-publishing a peer's endpoin
 - The comparison is done on the **plaintext** endpoint (`{"ipv4": "...", "ipv6": "..."}`), not the stored ciphertext, so it correctly detects "no change" even though the encrypted value differs on every publish (a fresh nonce is used each time)
 - When enabled and the endpoint is unchanged, the storage write is skipped for that peer, reducing API calls and — for revision-tracking backends like a GitHub Gist — avoiding a pile-up of unnecessary revisions
 - When disabled (the default), every peer is published on every refresh cycle
+- `dedup` is read from the instance the peer names in `plugin:`. On an instance that is only reached through a chain, it has no effect
 
 ```yaml
 plugins:
@@ -73,6 +120,8 @@ plugins:
 :::warning
 
 **Do not enable `dedup` for backends whose stored values expire or have a TTL** (e.g. a DHT with a short TTL). Those backends rely on periodic re-publishing to keep the value alive; if `dedup` skips the write, the value can expire and peers will fail to discover the endpoint. Only enable `dedup` for persistent backends (Cloudflare DNS, GitHub Gist, a durable KV store) where a written value remains until explicitly overwritten.
+
+The same applies to a [`mirror`](builtin.md#mirror): if any of its stores has a TTL, such as `opendht`, keep `dedup: false` on the mirror.
 
 :::
 

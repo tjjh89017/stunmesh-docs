@@ -6,7 +6,9 @@ sidebar_position: 2
 
 # Built-in Plugins
 
-Built-in plugins are compiled directly into the stunmesh-go binary. Release binaries include all of them; when building from source, select them with the `BUILTIN` make variable — see [Building from Source](../reference/build.md#built-in-plugin-options).
+Built-in plugins are compiled directly into the stunmesh-go binary. Release binaries include all of them: `cloudflare`, `opendht`, `trace` and `mirror`. A source build includes them too. To drop one, or to build a binary with your own plugin, see [Building from Source](../reference/build.md#built-in-plugins) and [Custom Binaries and Go Plugins](custom-binary.md).
+
+`cloudflare` and `opendht` store data. `trace` and `mirror` (new in v1.16.0) store nothing themselves. They wrap other plugin instances; see [Chaining plugins](overview.md#chaining-plugins).
 
 ## Cloudflare DNS
 
@@ -58,3 +60,70 @@ Each endpoint must include an explicit `http://` or `https://` scheme, or startu
 :::
 
 Savoir-faire Linux runs several public proxies for Jami; `dhtproxy2.jami.net` and `dhtproxy3.jami.net` are reachable over both IPv4 and IPv6, so listing both from different regions costs nothing until the first breaks. Avoid the bare `dhtproxy.jami.net`, which round-robins over an address that no longer serves. DHT lookups take seconds rather than milliseconds. The trade-offs, which proxies to use, and how to run your own are covered in [opendht/README.md](https://github.com/tjjh89017/stunmesh-plugins/blob/main/opendht/README.md) in the stunmesh-plugins repository — that plugin is the same design as a shell script, and its documentation applies here too.
+
+## Trace
+
+New in v1.16.0. Forwards every `get` and `set` unchanged to one other instance, and records each call. Use it to see what stunmesh asks of a backend.
+
+```yaml
+plugins:
+  cf:
+    type: builtin
+    name: cloudflare
+    zone: example.com
+    token: your_api_token_here
+
+  cf_traced:
+    type: builtin
+    name: trace
+    next: cf                                # Required: the instance to wrap
+    file: /var/log/stunmesh-trace.jsonl     # Optional
+```
+
+| Field | Required | Description |
+|---|---|---|
+| `next` | yes | Name of the instance to forward to. Any type: `builtin`, `exec` or `shell`. |
+| `file` | no | Append one JSON line per call to this file. Without it, each call is logged at `debug` level. |
+
+Each record holds the time, the operation, the device, both public keys, the storage key, the value length, the duration and the result. It never holds the value itself:
+
+```json
+{"time":"2026-11-01T10:00:00Z","op":"set","device":"wg0","local_public_key":"...","peer_public_key":"...","key":"3061b8fc...","value_len":184,"duration_ms":212.4,"ok":true}
+```
+
+## Mirror
+
+New in v1.16.0. Writes to several instances and reads from the first one that answers. Use it to publish to two backends, so a peer can still find you when one backend is down.
+
+```yaml
+plugins:
+  cf:
+    type: builtin
+    name: cloudflare
+    zone: example.com
+    token: your_api_token_here
+
+  dht:
+    type: builtin
+    name: opendht
+    endpoints:
+      - https://dhtproxy2.jami.net
+
+  both:
+    type: builtin
+    name: mirror
+    stores: [cf, dht]   # Required: one or more instance names, in order
+```
+
+| Field | Required | Description |
+|---|---|---|
+| `stores` | yes | List of instance names. |
+
+- **Set** writes to every instance in the list. It fails if any write fails.
+- **Get** asks the instances in list order and returns the first non-empty value. It fails only when no instance has a value.
+
+:::warning
+
+Do not set `dedup: true` on a `mirror` that contains a backend with a TTL, such as `opendht`. The skipped write lets the OpenDHT value expire. See [Deduplication](overview.md#deduplication-dedup).
+
+:::
