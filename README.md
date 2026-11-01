@@ -39,7 +39,3 @@ This repo is the last step after stunmesh-go, stunmesh-provisioner, stunmesh-ope
 3. Remove any `:::caution Unreleased` admonitions for features in this release.
 4. Review [`docs/guides/openwrt.md`](docs/guides/openwrt.md) for the OpenWrt series in the feed URL, and any page that names a version.
 5. Push to `main`; the [deploy workflow](.github/workflows/deploy.yml) publishes the site.
-
-## License
-
-Documentation is licensed under the same terms as stunmesh-go: LGPL-3.0-or-later.
