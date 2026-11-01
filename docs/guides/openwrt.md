@@ -24,7 +24,7 @@ service stunmesh enable
 service stunmesh start
 ```
 
-Replace `openwrt-25.12` with `SNAPSHOT` to track snapshot builds instead. The `stunmesh-go` package pulls in `kmod-wireguard` and `ca-bundle`, and is built with the `builtin_all` tag so the Cloudflare and OpenDHT storage plugins are included; the config lives at `/etc/stunmesh/config.yaml` and the init script at `/etc/init.d/stunmesh`. The same feed also ships `stunmesh-agent` and `stunmesh-provd` for the separate stunmesh-provisioner project — see [stunmesh-openwrt](https://github.com/tjjh89017/stunmesh-openwrt) for those.
+Replace `openwrt-25.12` with `SNAPSHOT` to track snapshot builds instead. The `stunmesh-go` package pulls in `kmod-wireguard` and `ca-bundle`, and includes every built-in storage plugin (Cloudflare, OpenDHT, trace and mirror); the config lives at `/etc/stunmesh/config.yaml` and the init script at `/etc/init.d/stunmesh`. The same feed also ships `stunmesh-agent` and `stunmesh-provd` for the separate stunmesh-provisioner project — see [stunmesh-openwrt](https://github.com/tjjh89017/stunmesh-openwrt) for those.
 
 ## OpenWrt 24.10: installer script
 

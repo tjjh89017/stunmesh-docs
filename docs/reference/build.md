@@ -43,14 +43,24 @@ UPX-packed binaries decompress wholesale into RAM at exec and cannot be demand-p
 |---|---|---|
 | `EMBED_CA=1` | off | Embed the Mozilla root CA bundle (build tag `embedca`, ~160KB). Used **only** when the system provides no certificate store, so HTTPS plugins work on minimal images (OpenWrt before 21.02, bare buildroot) without a ca-certificates package |
 
-### Built-in plugin options
+### Built-in plugins
 
-| Variable | Effect |
-|---|---|
-| `BUILTIN=all` | (Default) Compile with all available built-in plugins (cloudflare, opendht) |
-| `BUILTIN=` | Build without any built-in plugins (minimal binary) |
-| `BUILTIN=builtin_cloudflare` | Compile with the Cloudflare built-in only |
-| `BUILTIN="builtin_cloudflare builtin_opendht"` | Multiple plugins (quotes required, space-separated) |
+Imports choose the built-in plugins, not build flags. `main.go` imports `builtin/all`, so `make build` and `go build` include every shipped built-in: `cloudflare`, `opendht`, `trace` and `mirror`.
+
+To drop one built-in from `builtin/all`, build with the tag `no_<name>`:
+
+```bash
+go build -tags no_opendht -o stunmesh-go .
+go build -tags "no_cloudflare no_opendht" -o stunmesh-go .
+```
+
+For an exact plugin set, or to add your own plugin, write a small `main` package that imports `app` and only the packages you want. See [Custom Binaries and Go Plugins](../plugins/custom-binary.md).
+
+:::note
+
+The `BUILTIN=` make variable and the `builtin_all` and `builtin_<name>` build tags were removed in v1.16.0. They have no effect. `make` prints a warning when `BUILTIN` is set.
+
+:::
 
 **Examples:**
 
@@ -61,17 +71,11 @@ make build
 # Debuggable binary (keep symbols and DWARF)
 make build STRIP=0
 
-# Build without any built-in plugins (minimal binary)
-make build BUILTIN=
-
 # Self-contained HTTPS for images without ca-certificates
 make build EMBED_CA=1
 
-# Minimal binary without built-in plugins
-make all BUILTIN=
-
-# Specific built-in plugin only
-make all BUILTIN=builtin_cloudflare
+# All built-ins except OpenDHT
+go build -tags no_opendht -o stunmesh-go .
 ```
 
 **Platform notes:**

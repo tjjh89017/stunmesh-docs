@@ -14,6 +14,9 @@ The shell plugin provides a simpler alternative for shell scripts, using shell v
 STUNMESH_ACTION=get
 STUNMESH_KEY=3061b8fcbdb6972059518f1adc3590dca6a5f352  # SHA-1 hash of peer identifier (hex)
 STUNMESH_VALUE=a1b2c3d4e5f6...  # Hex-encoded encrypted endpoint data (for "set" only)
+STUNMESH_DEVICE='wg0'  # New in v1.16.0: interface or tunnel name, single-quoted
+STUNMESH_LOCAL_PUBLIC_KEY=base64...  # New in v1.16.0: this host's WireGuard public key
+STUNMESH_PEER_PUBLIC_KEY=base64...  # New in v1.16.0: the remote peer's WireGuard public key
 ```
 
 **Output:**
@@ -24,9 +27,11 @@ STUNMESH_VALUE=a1b2c3d4e5f6...  # Hex-encoded encrypted endpoint data (for "set"
 
 Notes:
 
-- Both `STUNMESH_KEY` and `STUNMESH_VALUE` are hex strings (no special characters)
 - The value format is identical to the [exec plugin](exec-protocol.md#stored-data-format) (hex-encoded encrypted JSON)
-- No escaping or quoting needed — safe to use with `source /dev/stdin` or `eval`
+- `STUNMESH_KEY`, `STUNMESH_VALUE` and the public keys are hex or base64, so they are not quoted
+- `STUNMESH_DEVICE` is free text (on mobile it is the tunnel name). It is single-quoted, with `'` written as `'\''`, and control characters are removed
+- Every line is safe to use with `source /dev/stdin` or `eval`
+- The three variables new in v1.16.0 are optional for scripts; a script that ignores them keeps working. Each is empty when stunmesh does not know it. The private key is never sent
 
 ## Configuration
 

@@ -24,6 +24,7 @@ const sidebars = {
         'plugins/builtin',
         'plugins/exec-protocol',
         'plugins/shell-protocol',
+        'plugins/custom-binary',
       ],
     },
     {
