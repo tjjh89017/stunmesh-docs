@@ -1,0 +1,137 @@
+---
+id: overview
+title: Overview
+sidebar_position: 1
+---
+
+# Storage Plugins
+
+Peers exchange their encrypted endpoints through a storage backend. The plugin system lets you:
+
+- **Use multiple storage backends**: different storage solutions for different peers
+- **Name plugin instances**: configure multiple instances of the same plugin type
+- **Assign plugins per peer**: each peer can use a different plugin instance
+
+Every peer entry references a named instance from the `plugins:` section:
+
+```yaml
+plugins:
+  cf_builtin:
+    type: builtin
+    name: cloudflare
+    zone: example.com
+    token: your_api_token_here
+
+interfaces:
+  wg0:
+    peers:
+      peer1:
+        public_key: "base64_encoded_key"
+        plugin: cf_builtin
+```
+
+## Plugin types
+
+stunmesh-go supports three plugin types. All are fully supported and production-ready — choose based on your deployment needs:
+
+| Type | Runs as | Protocol | Best for |
+|---|---|---|---|
+| [`builtin`](builtin.md) | Compiled into the binary | — | Single-binary deployment, minimal size |
+| [`exec`](exec-protocol.md) | External process | JSON over stdin/stdout | Complex plugins, any language |
+| [`shell`](shell-protocol.md) | External process | Shell variables over stdin | Simple shell scripts |
+
+**Built-in** (`type: builtin`) — compiled directly into the stunmesh-go binary. Single binary, no external processes, no IPC overhead, faster startup. Available built-ins: `cloudflare`, `opendht`, and the chaining plugins `trace` and `mirror`. You can also [write your own built-in in Go](custom-binary.md) and build it into a custom binary.
+
+**Exec** (`type: exec`) — executes an external program speaking JSON over stdin/stdout. Plugins update independently of the main binary, can be written in any language, and are easier to debug and share.
+
+**Shell** (`type: shell`) — a simplified protocol for shell scripts: variables over stdin, plain text out. No JSON parsing required; ideal for quick prototyping and gluing to existing shell tools.
+
+## Chaining plugins
+
+New in v1.16.0. A plugin instance can wrap other instances defined under `plugins:`. The outer plugin names its inner instances in its own config field. Two built-ins work this way:
+
+- [`trace`](builtin.md#trace) wraps one instance (field `next`) and records each call.
+- [`mirror`](builtin.md#mirror) wraps several instances (field `stores`). It writes to all of them and reads from the first that answers.
+
+Inner instances can be of any type, including `exec` and `shell`. A peer still names one instance in `plugin:`, usually the outermost one.
+
+This example publishes to a local shell store and to OpenDHT. Every call to the shell store is traced to a file:
+
+```yaml
+plugins:
+  files:
+    type: shell
+    command: /usr/local/bin/stunmesh-file-store.sh
+
+  files_traced:
+    type: builtin
+    name: trace
+    next: files
+    file: /var/log/stunmesh-trace.jsonl
+
+  dht:
+    type: builtin
+    name: opendht
+    endpoints:
+      - https://dhtproxy2.jami.net
+      - https://dhtproxy3.jami.net
+
+  both:
+    type: builtin
+    name: mirror
+    stores: [files_traced, dht]
+    # No dedup here: dht is a TTL backend.
+
+interfaces:
+  wg0:
+    peers:
+      peer1:
+        public_key: "base64_encoded_key"
+        plugin: both
+```
+
+The chain is `both -> [files_traced -> files, dht]`. Startup fails when a chain names an undefined instance or forms a cycle, for example `plugin cycle: a -> b -> a`.
+
+## What plugins store
+
+Plugins only store and retrieve an opaque hex string — the peer's endpoint JSON encrypted with a Curve25519 sealed box. No encryption or JSON parsing happens inside the plugin. See the [exec protocol page](exec-protocol.md#stored-data-format) for the data format details.
+
+## Deduplication (`dedup`)
+
+Any plugin instance can set `dedup: true` to skip re-publishing a peer's endpoint when it hasn't changed since the last successful publish:
+
+- Type: boolean, default: `false`
+- Set inside the plugin instance block, alongside `type` (applies to all peers using that instance)
+- The comparison is done on the **plaintext** endpoint (`{"ipv4": "...", "ipv6": "..."}`), not the stored ciphertext, so it correctly detects "no change" even though the encrypted value differs on every publish (a fresh nonce is used each time)
+- When enabled and the endpoint is unchanged, the storage write is skipped for that peer, reducing API calls and — for revision-tracking backends like a GitHub Gist — avoiding a pile-up of unnecessary revisions
+- When disabled (the default), every peer is published on every refresh cycle
+- `dedup` is read from the instance the peer names in `plugin:`. On an instance that is only reached through a chain, it has no effect
+
+```yaml
+plugins:
+  cf_builtin:
+    type: builtin
+    name: cloudflare
+    zone: example.com
+    token: your_api_token_here
+    dedup: true  # Skip re-publishing when the endpoint hasn't changed
+```
+
+:::warning
+
+**Do not enable `dedup` for backends whose stored values expire or have a TTL** (e.g. a DHT with a short TTL). Those backends rely on periodic re-publishing to keep the value alive; if `dedup` skips the write, the value can expire and peers will fail to discover the endpoint. Only enable `dedup` for persistent backends (Cloudflare DNS, GitHub Gist, a durable KV store) where a written value remains until explicitly overwritten.
+
+The same applies to a [`mirror`](builtin.md#mirror): if any of its stores has a TTL, such as `opendht`, keep `dedup: false` on the mirror.
+
+:::
+
+## External plugins
+
+Reference implementations of the exec and shell protocols live in the separate [stunmesh-plugins](https://github.com/tjjh89017/stunmesh-plugins) repository. They cover the same backends as the [built-in plugins](builtin.md), so most setups do not need them; use them as a starting point for your own backend, or when you want the plugin outside the stunmesh-go binary:
+
+- **Cloudflare DNS** (`exec`): stores peer information in Cloudflare DNS TXT records — [cloudflare/README.md](https://github.com/tjjh89017/stunmesh-plugins/blob/main/cloudflare/README.md)
+- **OpenDHT** (`exec`): stores peer information in the OpenDHT distributed hash table — [opendht/README.md](https://github.com/tjjh89017/stunmesh-plugins/blob/main/opendht/README.md)
+- **Cloudflare DNS shell** (`shell`): shell-script variant of the Cloudflare plugin — [cloudflare-shell](https://github.com/tjjh89017/stunmesh-plugins/tree/main/cloudflare-shell)
+- **OpenDHT shell** (`shell`): OpenDHT without the `jq` dependency — POSIX `sh`, `sed`, `base64` and `curl` or `wget` are enough, so a default OpenWrt image (busybox + `uclient-fetch`) runs it as-is — [opendht-shell/README.md](https://github.com/tjjh89017/stunmesh-plugins/blob/main/opendht-shell/README.md)
+
+There are no prebuilt releases. Build them from source with `make build` in that repository (see [Building from Source](../reference/build.md#external-plugins)), or copy a shell script to the target host. Then reference them with their plugin type in your configuration. Community plugins are welcome.
