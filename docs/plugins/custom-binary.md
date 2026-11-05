@@ -22,7 +22,7 @@ A built-in plugin registers itself from its package's `init()`. It is in the bin
 | `github.com/tjjh89017/stunmesh-go/builtin/trace` | `trace` |
 | `github.com/tjjh89017/stunmesh-go/builtin/mirror` | `mirror` |
 
-The `app` package is the daemon itself. It imports no built-in, so your `main` decides the set. A config that names a plugin your binary does not include fails at startup with `builtin plugin not found`.
+The `app` package is the daemon itself. It imports no built-in, so your `main` decides the set. To run an embedded WireGuard node instead of the daemon, see [Userspace Node](../reference/userspace.md). A config that names a plugin your binary does not include fails at startup with `builtin plugin not found`.
 
 ## A minimal main.go
 
@@ -72,7 +72,7 @@ Start a module and build it:
 
 ```bash
 go mod init example.com/mystunmesh
-go get github.com/tjjh89017/stunmesh-go@v1.16.0
+go get github.com/tjjh89017/stunmesh-go@v1.17.0
 go build -o stunmesh .
 ```
 

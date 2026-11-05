@@ -63,7 +63,7 @@ Pull the stunmesh-go image:
 docker pull ghcr.io/tjjh89017/stunmesh:latest
 ```
 
-`latest` points at the newest stable release. To pin a version, use a release tag such as `ghcr.io/tjjh89017/stunmesh:v1.15.0` instead, here and in `docker-compose.yaml` below.
+`latest` points at the newest stable release. To pin a version, use a release tag such as `ghcr.io/tjjh89017/stunmesh:v1.17.0` instead, here and in `docker-compose.yaml` below.
 
 ## Step 3: Generate WireGuard keys (both hosts)
 

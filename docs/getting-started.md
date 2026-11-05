@@ -24,7 +24,7 @@ docker pull ghcr.io/tjjh89017/stunmesh
 
 The Docker Hub mirror (`tjjh89017/stunmesh`) is deprecated and will be **deleted** in the future — pulls from Docker Hub will stop working entirely. Use `ghcr.io` only.
 
-Release tags (e.g. `v1.15.0`) are published alongside `latest`, which always points at the newest stable release — release candidates (`-rc*` tags) never move it.
+Release tags (e.g. `v1.17.0`) are published alongside `latest`, which always points at the newest stable release — release candidates (`-rc*` tags) never move it.
 
 For a complete two-host walkthrough using the container image with Docker Compose, see [Linux to Linux with Docker Compose](guides/linux-docker.md).
 

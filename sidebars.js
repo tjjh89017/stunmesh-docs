@@ -46,6 +46,7 @@ const sidebars = {
       items: [
         'reference/build',
         'reference/platform-internals',
+        'reference/userspace',
       ],
     },
     'contribute',
